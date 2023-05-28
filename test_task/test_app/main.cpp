@@ -5,16 +5,14 @@
 
 //! Project includes
 #include "appcontroller.h"
-
-//! 3rd patry Includes
-#include <alog/all.h>
-DEFINE_ALOGGER_MODULE_NS(App_EventLoop);
+#include "model.h"
 
 namespace Internal {
 
 void registerTypes()
 {
     AppController::registerType();
+    MainModel::registerTypes();
 }
 
 void loadMainWindow(QQmlApplicationEngine& engine, const QGuiApplication& app)
@@ -33,16 +31,6 @@ void loadMainWindow(QQmlApplicationEngine& engine, const QGuiApplication& app)
 
 int main(int argc, char *argv[])
 {
-    auto filters = ALog::Filters::Chain::create({
-        std::make_shared<ALog::Filters::Always>(true),
-    });
-
-    ALog::DefaultLogger logger;
-    logger->setMode(ALog::Logger::LoggerMode::AsynchronousSort);
-    logger->setAutoflush(true);
-    logger->pipeline().filters().set(filters);
-    logger.markReady();
-
     int ret { 0 };
     try
     {
@@ -55,17 +43,20 @@ int main(int argc, char *argv[])
 
         Internal::loadMainWindow(engine, app);
 
-        LOGD << "Starting app!";
+        qDebug() << "[ Eventloop ] Starting app!";
+
+        QString arg(argv[1]);
+        controller.setSearchPath(arg);
 
         ret = app.exec();
 
-        LOGD << "Finalizing... ";
+        qDebug() << "[ Eventloop ] Finalizing... ";
     } catch (...) {
-        LOGE << "Unhandled exception caught. Finalizing.";
+        qWarning() << "[ Eventloop ] Unhandled exception caught. Finalizing.";
         return -1;
     }
 
-    LOGW << "Eventloop ended with " << ret;
+    qWarning() << "[ Eventloop ] ended with " << ret;
 
     return ret;
 }

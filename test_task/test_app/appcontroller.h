@@ -2,13 +2,10 @@
 
 #include <QObject>
 
-#include <utils-cpp/pimpl.h>
-#include <utils-cpp/singleton.h>
+#include "utils/pimpl.h"
+#include "utils/singletone.h"
 
-#define DECLARE_PIMPL_EX(classname) \
-classname(const classname &) = delete; \
-    classname &operator=(const classname &) = delete; \
-    DECLARE_PIMPL
+class MainModel;
 
 class AppController : public QObject, public Singleton<AppController>
 {
@@ -16,12 +13,24 @@ class AppController : public QObject, public Singleton<AppController>
 public:
     static void registerType();
 
+    Q_PROPERTY(MainModel* mainModel READ mainModel CONSTANT)
+    Q_PROPERTY(int active READ active NOTIFY activeChanged)
+
     AppController();
     ~AppController() override;
 
+    Q_INVOKABLE bool setSearchPath(const QString& path);
+
     Q_INVOKABLE void runCompress(const QString& fileName);
 
+    //! property support
+    int active() const;
+    MainModel* mainModel();
+
 signals:
+    void activeChanged();
+    //! property support
+
     void done(const QString& err);
 
 private:

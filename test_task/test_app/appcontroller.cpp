@@ -2,14 +2,15 @@
 
 #include <QQmlEngine>
 
-#include <archivator.h>
+#include "model.h"
 
-#include <alog/all.h>
-DEFINE_ALOGGER_MODULE_NS(AppController);
+#include <archivator.h>
 
 struct AppController::impl_t
 {
+    int m_active { -1 };
 
+    MainModel m_model;
 };
 
 
@@ -32,9 +33,25 @@ AppController::~AppController()
 
 }
 
+bool AppController::setSearchPath(const QString& path)
+{
+    return true;
+}
+
 void AppController::runCompress(const QString& fileName)
 {
-    LOGD << "Run compression for " << fileName;
+    qDebug() << "[ AppController ] Run compression for " << fileName;
+
     Archivator::RawImageData data;
     Archivator::compressImage(data);
+}
+
+int AppController::active() const
+{
+    return impl().m_active;
+}
+
+MainModel* AppController::mainModel()
+{
+    return &impl().m_model;
 }
