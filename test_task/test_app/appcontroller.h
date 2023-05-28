@@ -20,7 +20,7 @@ public:
 
     Q_INVOKABLE bool setSearchPath(const QString& path);
 
-    Q_INVOKABLE void runCompress(const QString& fileName);
+    Q_INVOKABLE void process(const QString& fileName);
 
     //! property support
     int active() const;

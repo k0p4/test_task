@@ -1,75 +1,89 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
+import QtQuick.Layouts
 
 import AppController 1.0
 
-ApplicationWindow {
+ApplicationWindow
+{
+    width: 500
+    height: 400
 
     visible: true
 
-    width: 400
-    height: 300
-
     title: "test_app"
 
-    ListView {
+    RowLayout {
         anchors.fill: parent
-        model: AppController.model
 
-        delegate: Item {
-            width: parent.width
-            height: 40
+        ListView {
+            width: 300
+            height: 300
 
-            Rectangle {
-                width: parent.width
-                height: parent.height
-                color: ListView.isCurrentItem ? "lightblue" : "white"
+            model: AppController.mainModel
 
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: model.filename
-                    width: parent.width * 0.4
-                    horizontalAlignment: Text.AlignLeft
-                    elide: Text.ElideRight
+            delegate: Item {
+                width: ListView.view.width
+                height: 40
+
+                Rectangle {
+                    width: parent.width
+                    height: parent.height
+
+                    color: ListView.isCurrentItem ? "lightblue" : "white"
+
+                    RowLayout {
+                        Text {
+                            width: parent.width * 0.4
+
+                            text: model.filename
+
+                            horizontalAlignment: Text.AlignLeft
+                            elide: Text.ElideRight
+                        }
+
+                        Text {
+                            width: parent.width * 0.3
+
+                            text: model.width
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        Text {
+                            width: parent.width * 0.3
+
+                            text: model.height
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
                 }
 
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: model.width
-                    width: parent.width * 0.3
-                    horizontalAlignment: Text.AlignHCenter
-                }
+                MouseArea {
+                    anchors.fill: parent
 
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: model.height
-                    width: parent.width * 0.3
-                    horizontalAlignment: Text.AlignHCenter
-                }
-            }
+                    onClicked: {
+                        console.log("Clicked on item:", index, model.filename);
 
-            Component.onCompleted: {
-                console.warn("#########");
+                        AppController.process(model.filename);
+                    }
+                }
             }
         }
+
+        Button {
+            text: "Choose folder to compress"
+            onClicked: fd.open();
+        }
     }
-/*
-    Button {
-        text: "Choose file to compress"
-        anchors.centerIn: parent
-        onClicked: fd.open()
-    }
-*/
-    FileDialog {
+
+    FolderDialog {
         id: fd
 
-        title: "Open File"
+        title: "Set search path"
 
         onAccepted: {
-            console.log("File dialog ended with:", fd.currentFile);
-
-            AppController.runCompress(fd.currentFile);
+            AppController.setSearchPath(fd.currentFolder);
         }
 
         onRejected: {

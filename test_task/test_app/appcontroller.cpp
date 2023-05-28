@@ -70,10 +70,15 @@ bool AppController::setSearchPath(const QString& path)
 {
     QString searchPath = path;
     if (path.isEmpty() || !QDir::isAbsolutePath(path)) {
-        searchPath = QDir::currentPath();
+        QUrl url { path };
+        if (!url.isValid()) {
+            searchPath = QDir::currentPath();
+        } else {
+            searchPath = url.path();
+        }
     }
 
-    qDebug() << "[ AppController ] Setting search path to: " << path;
+    qDebug() << "[ AppController ] Setting search path to: " << searchPath;
 
     QStringList filters;
     filters << "*.bmp" << "*.png" << "*.barch";
@@ -110,7 +115,7 @@ bool AppController::setSearchPath(const QString& path)
     return true;
 }
 
-void AppController::runCompress(const QString& fileName)
+void AppController::process(const QString& fileName)
 {
     qDebug() << "[ AppController ] Run compression for " << fileName;
 

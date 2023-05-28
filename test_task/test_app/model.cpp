@@ -56,6 +56,7 @@ QVariant MainModel::data(const QModelIndex& index, int role) const
         break;
     case Qt::UserRole + 3:
         return QVariant(itemData.height);
+        break;
     default:
         break;
     }
@@ -82,6 +83,5 @@ void MainModel::addItem(const QString& item, int width, int height)
     endInsertRows();
 
     QFileInfo fileInfo(item);
-
     qDebug() << "[ MainModel ] Item added: " << fileInfo.fileName() << " widht: " << width << " height:" << height;
 }
