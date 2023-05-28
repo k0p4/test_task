@@ -6,13 +6,38 @@
 #include <QDataStream>
 #include <QFile>
 #include <QIODevice>
-
+#include <QImageWriter>
 
 #include <archivator.h>
 
+QDataStream& operator<<(QDataStream& out, const std::vector<unsigned char>& vec)
+{
+    out << static_cast<quint32>(vec.size());
+
+    for (const auto& item : vec) {
+        out << item;
+    }
+
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, std::vector<unsigned char>& vec)
+{
+    quint32 size;
+    in >> size;
+
+    vec.resize(size);
+
+    for (auto& item : vec) {
+        in >> item;
+    }
+
+    return in;
+}
+
 namespace Internal {
 
-bool parseBarchFile(const QString& fileName, int& width, int& height)
+[[nodiscard]] bool parseBarchFileHeader(const QString& fileName, int& width, int& height)
 {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -23,17 +48,66 @@ bool parseBarchFile(const QString& fileName, int& width, int& height)
     QDataStream in(&file);
 
     QString id;
-
     in >> id;
-    in >> width;
-    in >> height;
-
-    file.close();
 
     if (id != "BA") {
         qDebug() << "[ AppController ] Seems like incorrect format for " << fileName;
         return false;
     }
+
+    in >> width;
+    in >> height;
+
+    file.close();
+
+    return true;
+}
+
+[[nodiscard]] bool parseBarchFile(const QString& fileName, Archivator::RawImageData& data)
+{
+    //! AK: duplicate code here is ok, cuz if call parse header first there will be additional file and datastream allocations.
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "[ AppController ] Failed to open the file: " << fileName;
+        return false;
+    }
+
+    QDataStream in(&file);
+
+    QString id;
+    in >> id;
+
+    if (id != "BA") {
+        qDebug() << "[ AppController ] Seems like incorrect format for " << fileName;
+        return false;
+    }
+
+    in >> data.width;
+    in >> data.height;
+    in >> data.data;
+
+    file.close();
+
+    return true;
+}
+
+[[nodiscard]] bool saveBarchFile(const QString& fileName, const Archivator::RawImageData& data, const int compressedSize)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "[ AppController ] Failed to open the file: " << fileName;
+        return false;
+    }
+
+    QDataStream out(&file);
+
+    QString id = "BA";
+    out << id;
+    out << data.width;
+    out << data.height;
+    out << data.data;
+
+    file.close();
 
     return true;
 }
@@ -103,7 +177,10 @@ bool AppController::setSearchPath(const QString& path)
             width = image.width();
             height = image.height();
         } else if (file.endsWith(".barch")) {
-            Internal::parseBarchFile(file, width, height);
+            if (!Internal::parseBarchFileHeader(file, width, height)) {
+                qDebug() << "[ AppController ] Failed to load the image: " << file;
+                continue;
+            }
         } else {
             qDebug() << "[ AppController ] Unknown file format: " << file;
             continue;
@@ -115,12 +192,54 @@ bool AppController::setSearchPath(const QString& path)
     return true;
 }
 
+//! TODO: error notification
+
 void AppController::process(const QString& fileName)
 {
     qDebug() << "[ AppController ] Run compression for " << fileName;
 
+    if (fileName.endsWith(".barch")) {
+        Archivator::RawImageData data;
+
+        if (!Internal::parseBarchFile(fileName, data)) {
+            qDebug() << "[ AppController ] Failed to load the image: " << fileName;
+        }
+
+        auto decompressed = Archivator::decompressImage(data);
+
+        QImage image(decompressed.data.data(), decompressed.width, decompressed.height, QImage::Format_Grayscale8);
+
+        QImageWriter writer("decompressed.png", "PNG");
+        writer.write(image);
+
+        //! TODO: test call
+        setSearchPath("");
+        return;
+    }
+
+    QImage image(fileName);
+
+    if (image.isNull()) {
+        qDebug() << "[ AppController ] Failed to load the image: " << fileName;
+        return;
+    }
+
     Archivator::RawImageData data;
-    Archivator::compressImage(data);
+
+    data.width = image.width();
+    data.height = image.height();
+
+    data.data = std::vector<unsigned char>(image.bits(), image.bits() + image.sizeInBytes());
+
+    int compressedSize = 0;
+    auto compressed = Archivator::compressImage(data);
+
+    if (!Internal::saveBarchFile("compressed.barch", data, compressedSize)) {
+        qDebug() << "Could not save compressed data!";
+    }
+
+    //! TODO: test call
+    setSearchPath("");
 }
 
 int AppController::active() const

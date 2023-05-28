@@ -4,17 +4,20 @@
 #include <fstream>
 #include <vector>
 
+#include <vector>
+
 namespace Archivator
 {
 
-std::vector<int> compressImage(const RawImageData& imageData)
+RawImageData compressImage(const RawImageData& imageData)
 {
-    return { };
+    return imageData;
 }
 
-std::vector<unsigned char> decompressImage(const std::vector<int>& compressedData, const RawImageData& imageData)
+RawImageData decompressImage(const RawImageData& imageData)
 {
-    return { };
+    return imageData;
 }
 
-} // Archivator
+} // namespace Archivator
+
