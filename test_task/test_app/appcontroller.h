@@ -2,10 +2,9 @@
 
 #include <QObject>
 
+#include "model.h"
 #include "utils/pimpl.h"
 #include "utils/singletone.h"
-
-class MainModel;
 
 class AppController : public QObject, public Singleton<AppController>
 {

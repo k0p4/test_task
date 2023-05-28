@@ -12,7 +12,7 @@ find_package(Qt6 COMPONENTS Quick Core Network REQUIRED)
 
 add_executable(test_app ${SOURCES} qml.qrc)
 
-target_link_libraries(test_app PRIVATE Qt6::Quick utils-cpp alog test_lib)
+target_link_libraries(test_app PRIVATE Qt6::Quick test_lib)
 
 install(TARGETS test_app
     BUNDLE DESTINATION .

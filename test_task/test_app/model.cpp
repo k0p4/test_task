@@ -1,13 +1,21 @@
 #include "model.h"
 
 #include <QQmlEngine>
+#include <QFileInfo>
 
 #include <vector>
 #include <map>
 
 struct MainModel::impl_t
 {
-    QList<QString> m_data;
+    struct ItemData
+    {
+        QString filename;
+        int width;
+        int height;
+    };
+
+    QList<ItemData> m_data;
 };
 
 void MainModel::registerTypes()
@@ -37,8 +45,19 @@ QVariant MainModel::data(const QModelIndex& index, int role) const
         return { };
     }
 
-    if (role == Qt::UserRole + 1) {
-        return QVariant(impl().m_data[index.row()]);
+    const auto& itemData = impl().m_data[index.row()];
+
+    switch(role) {
+    case Qt::UserRole + 1:
+        return QVariant(itemData.filename);
+        break;
+    case Qt::UserRole + 2:
+        return QVariant(itemData.width);
+        break;
+    case Qt::UserRole + 3:
+        return QVariant(itemData.height);
+    default:
+        break;
     }
 
     qDebug() << "[ MainModel ] Not supported role request.";
@@ -47,12 +66,22 @@ QVariant MainModel::data(const QModelIndex& index, int role) const
 
 QHash<int, QByteArray> MainModel::roleNames() const
 {
-    return { { Qt::UserRole + 1, "filename" } };
+    return {
+        { Qt::UserRole + 1, "filename" },
+        { Qt::UserRole + 2, "width" },
+        { Qt::UserRole + 3, "height" }
+    };
 }
 
-void MainModel::addItem(const QString& item)
+void MainModel::addItem(const QString& item, int width, int height)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    impl().m_data.push_back(item);
+
+    impl().m_data.append({ item, width, height });
+
     endInsertRows();
+
+    QFileInfo fileInfo(item);
+
+    qDebug() << "[ MainModel ] Item added: " << fileInfo.fileName() << " widht: " << width << " height:" << height;
 }

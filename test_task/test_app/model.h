@@ -18,10 +18,8 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE bool move(int srcIdx, int destIdx);
-
 public slots:
-    void addItem(const QString& item);
+    void addItem(const QString& item, int width, int height);
 
 private:
     DECLARE_PIMPL_EX(MainModel);

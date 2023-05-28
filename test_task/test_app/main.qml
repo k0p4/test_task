@@ -13,12 +13,54 @@ ApplicationWindow {
 
     title: "test_app"
 
+    ListView {
+        anchors.fill: parent
+        model: AppController.model
+
+        delegate: Item {
+            width: parent.width
+            height: 40
+
+            Rectangle {
+                width: parent.width
+                height: parent.height
+                color: ListView.isCurrentItem ? "lightblue" : "white"
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: model.filename
+                    width: parent.width * 0.4
+                    horizontalAlignment: Text.AlignLeft
+                    elide: Text.ElideRight
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: model.width
+                    width: parent.width * 0.3
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: model.height
+                    width: parent.width * 0.3
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+
+            Component.onCompleted: {
+                console.warn("#########");
+            }
+        }
+    }
+/*
     Button {
         text: "Choose file to compress"
         anchors.centerIn: parent
         onClicked: fd.open()
     }
-
+*/
     FileDialog {
         id: fd
 
