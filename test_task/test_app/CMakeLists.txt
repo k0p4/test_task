@@ -1,4 +1,6 @@
-project(test_app LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.14)
+
+project(test_app VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -6,14 +8,12 @@ set(CMAKE_AUTORCC ON)
 
 FILE(GLOB_RECURSE SOURCES *.cpp *.h)
 
-find_package(Qt6 COMPONENTS Core Network REQUIRED)
+find_package(Qt6 COMPONENTS Quick Core Network REQUIRED)
 
-add_executable(test_app
-  ${SOURCES}
-)
+add_executable(test_app ${SOURCES} qml.qrc)
 
-set_property(TARGET test_app PROPERTY CXX_STANDARD 17)
-target_link_libraries(test_app PUBLIC Qt6::Core Qt6::Network PRIVATE alog utils-cpp)
+target_link_libraries(test_app PRIVATE Qt6::Quick utils-cpp alog test_lib)
 
-# Install
-install(TARGETS test_app DESTINATION .)
+install(TARGETS test_app
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
