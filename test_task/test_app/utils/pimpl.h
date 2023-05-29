@@ -20,6 +20,6 @@
     void createImpl(Args&&... args) { assert(!_impl); _impl = std::make_unique<impl_t>(std::forward<Args>(args)...); }
 
 #define DECLARE_PIMPL_EX(classname) \
-classname(const classname &) = delete; \
+    classname(const classname &) = delete; \
     classname &operator=(const classname &) = delete; \
     DECLARE_PIMPL

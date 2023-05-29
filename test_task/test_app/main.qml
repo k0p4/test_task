@@ -56,6 +56,13 @@ ApplicationWindow
                             text: model.height
                             horizontalAlignment: Text.AlignHCenter
                         }
+
+                        Text {
+                            width: parent.width * 0.3
+
+                            text: model.active ? "Active" : "Not active"
+                            horizontalAlignment: Text.AlignHCenter
+                        }
                     }
                 }
 

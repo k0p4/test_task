@@ -11,8 +11,9 @@ struct MainModel::impl_t
     struct ItemData
     {
         QString filename;
-        int width;
-        int height;
+        int width { 0 };
+        int height { 0 };
+        bool active { false };
     };
 
     QList<ItemData> m_data;
@@ -57,6 +58,9 @@ QVariant MainModel::data(const QModelIndex& index, int role) const
     case Qt::UserRole + 3:
         return QVariant(itemData.height);
         break;
+    case Qt::UserRole + 4:
+        return QVariant(itemData.active);
+        break;
     default:
         break;
     }
@@ -70,7 +74,8 @@ QHash<int, QByteArray> MainModel::roleNames() const
     return {
         { Qt::UserRole + 1, "filename" },
         { Qt::UserRole + 2, "width" },
-        { Qt::UserRole + 3, "height" }
+        { Qt::UserRole + 3, "height" },
+        { Qt::UserRole + 4, "active" }
     };
 }
 
@@ -78,10 +83,32 @@ void MainModel::addItem(const QString& item, int width, int height)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-    impl().m_data.append({ item, width, height });
+    impl().m_data.append({ item, width, height, false });
 
     endInsertRows();
 
     QFileInfo fileInfo(item);
     qDebug() << "[ MainModel ] Item added: " << fileInfo.fileName() << " widht: " << width << " height:" << height;
+}
+
+void MainModel::setActive(const QString& item, bool active)
+{
+    auto it = std::find_if(impl().m_data.begin(), impl().m_data.end(), [item] (const MainModel::impl_t::ItemData& val) {
+        return item == val.filename;
+    });
+
+    if (it == impl().m_data.end()) {
+        qDebug() << "[ MainModel ] Invalid setActive call!";
+        return;
+    }
+
+    if (it->active == active) {
+        return;
+    }
+
+    it->active = active;
+
+    int row = std::distance(impl().m_data.begin(), it);
+    QModelIndex index = createIndex(row, 0);
+    emit dataChanged(index, index, { Qt::UserRole + 4 });
 }
