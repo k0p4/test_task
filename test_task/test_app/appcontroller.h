@@ -30,7 +30,7 @@ signals:
     void activeChanged();
     //! property support
 
-    void done(const QString& err);
+    void error(const QString& err);
 
 private:
     DECLARE_PIMPL_EX(AppController);

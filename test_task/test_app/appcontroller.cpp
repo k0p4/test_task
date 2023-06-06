@@ -13,6 +13,7 @@ struct AppController::impl_t
 {
     int m_active { -1 };
     MainModel m_model;
+    QString m_searchPath;
 };
 
 
@@ -37,21 +38,21 @@ AppController::~AppController()
 
 bool AppController::setSearchPath(const QString& path)
 {
-    QString searchPath = path;
+    impl().m_searchPath = path;
     if (path.isEmpty() || !QDir::isAbsolutePath(path)) {        
         if (QUrl url { path }; url.isValid()) {
-            searchPath = url.path();
+            impl().m_searchPath = url.path();
         } else {
-            searchPath = QDir::currentPath();
+            impl().m_searchPath = QDir::currentPath();
         }
     }
 
-    qDebug() << "[ AppController ] Setting search path to: " << searchPath;
+    qDebug() << "[ AppController ] Setting search path to: " << impl().m_searchPath;
 
     QStringList filters;
     filters << "*.bmp" << "*.png" << "*.barch";
 
-    QDir directory(searchPath);
+    QDir directory(impl().m_searchPath);
     QStringList files = directory.entryList(filters, QDir::Files);
 
     qDebug() << "[ AppController ] Filtered files in directory: " << files.size();
@@ -86,8 +87,6 @@ bool AppController::setSearchPath(const QString& path)
     return true;
 }
 
-//! TODO: error notification
-
 void AppController::process(const QString& fileName)
 {
     qDebug() << "[ AppController ] Run compression for " << fileName;
@@ -96,11 +95,15 @@ void AppController::process(const QString& fileName)
     QObject::connect(worker, &Worker::finished, this, [worker, fileName, this] () {
         impl().m_model.setActive(fileName, false);
         worker->deleteLater();
+
+        setSearchPath(impl().m_searchPath);
     }, Qt::QueuedConnection);
 
-    QObject::connect(worker, &Worker::error, this, [worker, fileName, this] (QString err) {
+    QObject::connect(worker, &Worker::error, this, [worker, fileName, this] (const QString& err) {
         impl().m_model.setActive(fileName, false);
         worker->deleteLater();
+
+        emit error(err);
     }, Qt::QueuedConnection);
 
     impl().m_model.setActive(fileName, true);

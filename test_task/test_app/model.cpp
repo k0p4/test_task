@@ -81,6 +81,14 @@ QHash<int, QByteArray> MainModel::roleNames() const
 
 void MainModel::addItem(const QString& item, int width, int height)
 {
+    auto it = std::find_if(impl().m_data.begin(), impl().m_data.end(), [item] (const impl_t::ItemData& data) {
+        return data.filename == item;
+    });
+
+    if (it != impl().m_data.end()) {
+        return;
+    }
+
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
     impl().m_data.append({ item, width, height, false });

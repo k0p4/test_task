@@ -18,6 +18,8 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+
+
 public slots:
     void addItem(const QString& item, int width, int height);
     void setActive(const QString& item, bool active);

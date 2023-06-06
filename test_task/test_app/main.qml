@@ -14,12 +14,23 @@ ApplicationWindow
 
     title: "test_app"
 
+    Connections {
+        target: AppController
+
+        function onError(err) {
+            md.text = err;
+            md.open();
+        }
+    }
+
     RowLayout {
         anchors.fill: parent
 
         ListView {
             width: 300
             height: 300
+
+            Layout.leftMargin: 10
 
             model: AppController.mainModel
 
@@ -95,6 +106,20 @@ ApplicationWindow
 
         onRejected: {
             console.log("Dialog was rejected");
+        }
+    }
+
+    MessageDialog {
+        id: md
+
+        title: "Error"
+        text: ""
+
+        buttons: StandardButton.Ok
+        visible: false
+
+        onAccepted: {
+            md.close();
         }
     }
 }

@@ -11,7 +11,7 @@ struct RawImageData {
     std::vector<unsigned char> data; // Image data. data[j * width + i] is color of pixel in row j and column i.
 };
 
-[[nodiscard]] RawImageData compressImage(const RawImageData& imageData);
-[[nodiscard]] RawImageData decompressImage(const RawImageData& imageData);
+[[nodiscard]] RawImageData compressImage(const RawImageData& imageData, std::vector<unsigned char>& indexes);
+[[nodiscard]] RawImageData decompressImage(const RawImageData& compressedImageData, const std::vector<unsigned char>& indexes);
 
 } // Archivator
