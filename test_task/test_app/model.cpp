@@ -79,6 +79,13 @@ QHash<int, QByteArray> MainModel::roleNames() const
     };
 }
 
+void MainModel::clearModel()
+{
+    beginResetModel();
+    impl().m_data.clear();
+    endResetModel();
+}
+
 void MainModel::addItem(const QString& item, int width, int height)
 {
     auto it = std::find_if(impl().m_data.begin(), impl().m_data.end(), [item] (const impl_t::ItemData& data) {

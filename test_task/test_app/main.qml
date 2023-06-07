@@ -7,8 +7,8 @@ import AppController 1.0
 
 ApplicationWindow
 {
-    width: 500
-    height: 400
+    width: 550
+    height: 350
 
     visible: true
 
@@ -23,14 +23,15 @@ ApplicationWindow
         }
     }
 
-    RowLayout {
+    ColumnLayout {
         anchors.fill: parent
 
         ListView {
-            width: 300
+            width: 400
             height: 300
 
             Layout.leftMargin: 10
+            Layout.topMargin: 10
 
             model: AppController.mainModel
 
@@ -90,8 +91,13 @@ ApplicationWindow
         }
 
         Button {
+            Layout.alignment: Qt.AlignHCenter
             text: "Choose folder to compress"
-            onClicked: fd.open();
+            onClicked: fd.open()
+        }
+
+        Item {
+            Layout.fillHeight: true
         }
     }
 

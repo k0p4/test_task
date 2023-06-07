@@ -1,9 +1,6 @@
 #include "archivator.h"
 
-#include <iostream>
-#include <vector>
-#include <assert.h>
-#include <algorithm>
+using std::size_t;
 
 namespace Archivator
 {

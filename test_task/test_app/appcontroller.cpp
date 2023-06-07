@@ -4,10 +4,10 @@
 #include <QDir>
 #include <QImage>
 
+#include <archivator.h>
+
 #include "utils/barchutils.h"
 #include "worker.h"
-
-#include <archivator.h>
 
 struct AppController::impl_t
 {
@@ -41,13 +41,15 @@ bool AppController::setSearchPath(const QString& path)
     impl().m_searchPath = path;
     if (path.isEmpty() || !QDir::isAbsolutePath(path)) {        
         if (QUrl url { path }; url.isValid()) {
-            impl().m_searchPath = url.path();
+            impl().m_searchPath = url.toLocalFile();
         } else {
             impl().m_searchPath = QDir::currentPath();
         }
     }
 
     qDebug() << "[ AppController ] Setting search path to: " << impl().m_searchPath;
+
+    impl().m_model.clearModel();
 
     QStringList filters;
     filters << "*.bmp" << "*.png" << "*.barch";
@@ -62,7 +64,7 @@ bool AppController::setSearchPath(const QString& path)
         int height { 0 };
 
         if (file.endsWith(".bmp") || file.endsWith("png")) {
-            QImage image(file);
+            QImage image(impl().m_searchPath + "/" + file);
 
             if (image.isNull()) {
                 qDebug() << "[ AppController ] Failed to load the image: " << file;
@@ -72,7 +74,7 @@ bool AppController::setSearchPath(const QString& path)
             width = image.width();
             height = image.height();
         } else if (file.endsWith(".barch")) {
-            if (!Internal::parseBarchFileHeader(file, width, height)) {
+            if (!Internal::parseBarchFileHeader(impl().m_searchPath + "/" +file, width, height)) {
                 qDebug() << "[ AppController ] Failed to load the image: " << file;
                 continue;
             }
@@ -108,7 +110,7 @@ void AppController::process(const QString& fileName)
 
     impl().m_model.setActive(fileName, true);
 
-    worker->process(fileName);
+    worker->process(fileName, impl().m_searchPath);
 }
 
 int AppController::active() const

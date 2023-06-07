@@ -8,7 +8,7 @@ class Worker : public QObject
 public:
     explicit Worker(QObject *parent = nullptr);
 
-    void process(const QString& fileName);
+    void process(const QString& fileName, const QString& dir);
 
 signals:
     void finished();
